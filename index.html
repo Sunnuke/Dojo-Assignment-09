@@ -1,0 +1,235 @@
+<html>
+    <head>
+        <title>NINJA-MAN</title>
+        <style type="text/css">
+            *{
+                margin: 0;
+                padding: 0;
+            }
+            .row {
+                display: flex;
+            }
+            .wall {
+                background-color: indigo;
+                height: 30px;
+                width: 30px;
+                display: inline-block;
+                border: solid 5px blue;
+            }
+            .empty {
+                background-color: black;
+                height: 40px;
+                width: 40px;
+                display: inline-block;
+            }
+            .sushi {
+                background-color: black;
+                height: 40px;
+                width: 40px;
+                display: inline-block;
+                background-image: url("img/sushi.png");
+                background-size: contain;
+            }
+            .onigiri {
+                background-color: black;
+                height: 40px;
+                width: 40px;
+                display: inline-block;
+                background-image: url("img/onigiri.png");
+                background-size: contain;
+            }
+            #ninja {
+                background-color: black;
+                height: 40px;
+                width: 40px;
+                display: inline-block;
+                background-image: url("img/edit/ninja1.gif");
+                background-size: contain;
+                position: absolute;
+                left: 40px;
+                top: 40px;
+            }
+            #scoreBoard {
+                background-color: black;
+                height: 400px;
+                width: 300px;
+                display: inline-block;
+                background-image: url("img2/black_bg.jpg");
+                background-repeat: no-repeat;
+                background-size: contain;
+                position: absolute;
+                left: 800px;
+                top: 40px;
+            }
+            .board {
+                background-color: black;
+                display: inline-block;
+                position: absolute;
+                padding: 55px 130px 55px 130px;
+                margin-top: 250px;
+                border: solid 20px blue;
+            }
+            #chart {
+                position: absolute;
+                top: 25px;
+                left: 12px;
+                color: red;
+                font-size: 80px;
+                
+            }
+            h4 {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                color: white;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="world"></div>
+        <div id="ninja"></div>
+        <div id="scoreBoard">
+            <div class="Board">
+                <h4>TOTAL SCORE:</h4>
+                <div id="chart" class="s"></div>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        var score = 0;
+        var vert = 40;
+        var hori = 40;
+        var pos = 1;
+        var world = genWorld(); // This is the map in variable form, think of it as arrays with in an array. Ex: var map = [[1,1,1],[1,0,1],[1,1,1]]; and the values in the array from left to right are rows from top to bottom.
+            
+
+        var worldDict = { // This is a list that links the values from var world to the appropriate CSS values
+            0: 'empty',
+            1: 'wall',
+            2: 'sushi',
+            3: 'onigiri',
+        }
+        
+        function drawWorld() { // This function generates the values of var world into objects that are relevant to var worldDict, and var worldDict can assign those object the proper style traits from CSS.
+            var output = ""; // This variable will store the information generated with in this function as a "string".
+
+            for(var row = 0; row < world.length; row++){ // This loop identifies each array at a time with in var world, thinking in perspective each array in var world is technically a row of values. The loop then generates a string value, "<div class = 'row'></div>", and is stored in var output.
+                output += "<div class = 'row'></div>";
+                for(var x = 0; x < world[row].length; x++){ // This loop identifies all the values in each array, or row, inside var world at a time.
+                    output += "<div class ='" + worldDict[world[row][x]] + "'></div>"; // Also taking place within this loop, may be a little confusing, a string outlined to be a div object is split open so the references of the specified variables and there values can be used through out the for 1 & 2 loop so the appropriate content can be displayed without repetitive strings of HTML Code.
+                } // To Explain this further: "<div class ='" + worldDict[world[row][x]] + "'></div>", This is basically this "<div class =''></div>", but there needs to be a class so it can communicate with the CSS, so this worldDict[world[row][x]] is being used "on it's turn" to take the "current" values and uses them in a way that will communicate a preferred desire of content that var worldDict will translate and it's translation of the values from the for loop will be a relevant phrase or word of the CSS that will be implemented by "class=" in the string.
+                // worldDict[world[row][x]] This is confusing in many ways but to break it down; [world[row][x]] this part of the code is talking to var world just relate [world[row][x]] to this, var world[[1,1,0],[1,0,1]] Ex: for loop 1 & 2 have a value of 1 for their variables row = 1, x = 1, [world[row][x]] = [world[1][1]]; now back to the code: worldDict[world[row][x]] = worldDict[world[1][1]]; so this code worldDict[world[1][1]] is communicating to the computer that it want's the computer, with var worldDict, to define the 2nd box in the 2nd row of var world "worldDict[world[1][1]]" and the value is 0 and 0 according to var worldDict = 'empty' Ex: <div class ='" + worldDict[world[1][1]] + "'></div>" will be <div class ='empty'></div>" and this string becomes a value that is stored in var output.
+            document.getElementById('world').innerHTML = output; // This line of code communicate with var world as a reference and var output for the values that it has stored through out the function, and is printed on to the document generating the appropriate content.
+            }
+        }
+        drawWorld(); // This line of code calls the function, without the function is just sitting there.
+        
+        function move(){
+            document.getElementById('ninja').style.top = ninja.y * 40 +"px"; //UP & DOWN
+            document.getElementById('ninja').style.left = ninja.x * 40 +"px"; //LEFT & RIGHT
+            document.getElementById('chart').innerHTML = score; //SCORE
+            document.getElementById('ninja').style.backgroundImage = "url('img/edit/ninja"+ pos +".gif')"; // FACE 
+        }
+        
+        function genWorld(){ // This is the Random world generator. It generates a [20x20] array with the first and last index([0]&[19]) of all the arrays inside equaling 1 and the first and last array being only 1.
+            var worldGen = [];
+            for(var g = 0; g < 20; g++){
+                var lag = [];
+                for(var i = 0; i < 20; i++){
+                    if(g == 0){
+                        lag.push(1)
+                    }
+                    else if(g == 19){
+                        lag.push(1)
+                    }
+                    else {
+                        lag.push(Math.floor(Math.random() * 4));
+                    }
+                }
+                worldGen.push(lag)
+                worldGen[g][0]= 1;
+                worldGen[g][19] = 1;
+            }
+            return worldGen;
+            console.log(x);
+        }
+
+        var ninja = {
+            x: 1,
+            y: 1
+        }
+        
+        document.onkeydown = function(e){
+        console.log(e)
+        
+        if(e.keyCode == 38){ // up
+            if(world[ninja.y - 1][ninja.x] != 1){
+                ninja.y--;
+                pos = 3;
+                if(world[ninja.y][ninja.x] != 0 && world[ninja.y][ninja.x] != 1){
+                    if(world[ninja.y][ninja.x] != 2){
+                        score = score + 50;
+                        console.log("Score: " + score);
+                    }
+                    else if(world[ninja.y][ninja.x] != 3){
+                        score = score + 10;
+                        console.log("Score: " + score);
+                    }
+                }
+            }
+        }
+        else if(e.keyCode == 40){ //down
+            if(world[ninja.y + 1][ninja.x] != 1){
+                ninja.y++;
+                pos = 4;
+                if(world[ninja.y][ninja.x] != 0 && world[ninja.y][ninja.x] != 1){
+                    if(world[ninja.y][ninja.x] != 2){
+                        score = score + 50;
+                        console.log("Score: " + score);
+                    }
+                    else if(world[ninja.y][ninja.x] != 3){
+                        score = score + 10;
+                        console.log("Score: " + score);
+                    }
+                }
+            }
+        }
+        else if(e.keyCode == 37){ //left
+            if(world[ninja.y][ninja.x - 1] != 1){
+                ninja.x--
+                pos = 2;
+                if(world[ninja.y][ninja.x] != 0 && world[ninja.y][ninja.x] != 1){
+                    if(world[ninja.y][ninja.x] != 2){
+                        score = score + 50;
+                        console.log("Score: " + score);
+                    }
+                    else if(world[ninja.y][ninja.x] != 3){
+                        score = score + 10;
+                        console.log("Score: " + score);
+                    }
+                }
+            }
+        } 
+        else if(e.keyCode == 39){ //right
+            if(world[ninja.y][ninja.x + 1] != 1){
+                ninja.x++;
+                pos = 1;
+                if(world[ninja.y][ninja.x] != 0 && world[ninja.y][ninja.x] != 1){
+                    if(world[ninja.y][ninja.x] != 2){
+                        score = score + 50;
+                        console.log("Score: " + score);
+                    }
+                    else if(world[ninja.y][ninja.x] != 3){
+                        score = score + 10;
+                        console.log("Score: " + score);
+                    }
+                }
+            }
+        }
+        world[ninja.y][ninja.x] = 0;
+        drawWorld();
+        move();
+    }
+    </script>
+</html>
